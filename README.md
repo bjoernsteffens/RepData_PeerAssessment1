@@ -339,6 +339,7 @@ Plotting the new timeseries the total number of steps per day a lot more data em
 Using the adjusted data set and adding the weekday and plotting one chart per Saturday and Sundday and one for the days Monday through Friday.
 
 Note 1: See previous charts for the daily weekday vs weekend activity pattern difference.
+
 Note 2: There are two days with 0 for all measurment intervals 2012-10-02 and 2012-11-15. These values have been left unadjusted for assuming that the step tracker was turned on but left at home.
 
     
@@ -368,7 +369,7 @@ Note 2: There are two days with 0 for all measurment intervals 2012-10-02 and 20
         theme(axis.text.x = element_text(size=10,margin = margin(0,0,20,0))) +
         ylab("Average Number of Steps") + 
         theme(axis.text.y = element_text(size=10,margin = margin(0,0,0,10))) +
-        ggtitle("Average Number of Steps for Weekend Days Adjustmed for Missing Values") +
+        ggtitle("Average Number of Steps for Weekend Days Adjusted for Missing Values") +
         theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
     
     g <- ggplot(stepsOrigWKDays, aes(x=Day, y=Steps))
@@ -386,7 +387,7 @@ Note 2: There are two days with 0 for all measurment intervals 2012-10-02 and 20
         theme(axis.text.x = element_text(size=10,margin = margin(0,0,20,0))) +
         ylab("Average Number of Steps") + 
         theme(axis.text.y = element_text(size=10,margin = margin(0,0,0,10))) +
-        ggtitle("Average Number of Steps for Weekdays Adjustmed for Missing Values") +
+        ggtitle("Average Number of Steps for Weekdays Adjusted for Missing Values") +
         theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
     
     grid.arrange(p1,p2, nrow = 2, ncol = 1)
