@@ -105,6 +105,7 @@ Note: Plots do not contain any missing values. They have all been filtered out p
     
 ![Sample panel plot](illustrations/reprores1a.png)
     
+    
     #
     # Plot it on the X axis, dont plot legend and turn the x-labels
     g <- ggplot(stepsDay, aes(x=Day, y=Steps, fill = 20))
@@ -282,6 +283,7 @@ How many missing values do we have? Executing mean(is.na(stepsOrig[1])) tells us
 
 Plotting the new timeseries the total number of steps per day a lot more data emerges. The plots also answers question No.7 illustrating the imputed data.
 
+
     #
     # Average the values per day
     stepsOrigAvg <- as.data.frame(tapply(stepsOrig$Steps, stepsOrig$Day, sum))
@@ -335,6 +337,9 @@ Plotting the new timeseries the total number of steps per day a lot more data em
 ### Are there differences in activity patterns between weekdays and weekends?
 
 Using the adjusted data set and adding the weekday and plotting one chart per Saturday and Sundday and one for the days Monday through Friday.
+
+Note 1: See previous charts for the daily weekday vs weekend activity patter.
+Note 2: There are two days with 0 for all measurment intervals 2012-10-02 and 2012-11-15. These values have been left unadjusted for assuming that the step tracker was turned on but left at home.
 
     
     stepsOrigAvg$WeekDay <- weekdays(as.Date(stepsOrigAvg$Day))
