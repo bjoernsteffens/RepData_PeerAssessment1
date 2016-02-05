@@ -73,7 +73,6 @@ NOTE: The GitHub repository also contains the dataset for the
 assignment so you do not have to download the data separately.
 
 
-
 ### Loading and preprocessing the data
 
 We will be using ggplot2 to plot data and read.csv to load the data during this exercise.
@@ -133,7 +132,7 @@ Note: Plots do not contain any missing values. They have all been filtered out p
          main = "Number of Steps per Day in Groups",
          col = "lightblue")
     
-![Sample panel plot](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1a.png)
+![Sample panel plot](illustrations/reprores1a.png)
     
     #
     # Plot it on the X axis, dont plot legend and turn the x-labels
@@ -153,7 +152,7 @@ Note: Plots do not contain any missing values. They have all been filtered out p
         ggtitle("Number of Steps Recorded per Day") +
         theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
         
-![Sample panel plot](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1b.png)
+![Sample panel plot](illustrations/reprores1b.png)
 
 
 ## What is the average daily activity pattern?
@@ -190,7 +189,7 @@ Looking closer at the data in between 0800 and 0900 we see that there are values
         theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
         
 
-![Sample panel plot](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1d.png)
+![Sample panel plot](illustrations/reprores1d.png)
     
 
 We learn that simply taking the daily average across the entire data set will be a bad strategy for imputing mussing data. We also see that depening on what time during the day and also the day of week.
@@ -223,7 +222,7 @@ Let's investigate that in more detail and see if we can learn more for implement
     
     grid.arrange(p1,p2, nrow = 2, ncol = 1, top = "Daily Steps Profile vs Interval Steps Profile")
     
-![Sample panel plot](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1e.png)
+![Sample panel plot](illustrations/reprores1e.png)
 
 
 New information from these plots are that Fridays and Thursdays have higher average number of steps. We also see that during the night we have considerably less steps and may need to consider assigning a very low value between 12:00am and 06:00am for missing values.
@@ -323,68 +322,66 @@ Plotting the new timeseries the total number of steps per day a lot more data em
     
     grid.arrange(p1,p2, nrow = 2, ncol = 1)
 
-![Sample panel plot](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1f.png)
+![Sample panel plot](illustrations/reprores1f.png)
 
 
 ### Are there differences in activity patterns between weekdays and weekends?
 
 Using the adjusted data set and adding the weekday and plotting one chart per Saturday and Sundday and one for the days Monday through Friday.
 
-```{r, echo=TRUE}
+    
+    stepsOrigAvg$WeekDay <- weekdays(as.Date(stepsOrigAvg$Day))
+    stepsOrigWEDays <- filter(data.table(stepsOrigAvg), WeekDay %in% c("Saturday","Sunday"))
+    stepsOrigWEDays <- as.data.frame(tapply(stepsOrigWEDays$Steps,stepsOrigWEDays$WeekDay, mean))
+    stepsOrigWEDays$Day <- row.names(stepsOrigWEDays)
+    colnames(stepsOrigWEDays) <- c("Steps","Day")
+    
+    stepsOrigWKDays <- filter(data.table(stepsOrigAvg), WeekDay %in% c("Monday","Tuesday","Wednesday","Thursday","Friday"))
+    stepsOrigWKDays <- as.data.frame(tapply(stepsOrigWKDays$Steps,stepsOrigWKDays$WeekDay, mean))
+    stepsOrigWKDays$Day <- row.names(stepsOrigWKDays)
+    colnames(stepsOrigWKDays) <- c("Steps","Day")
+    
+    g <- ggplot(stepsOrigWEDays, aes(x=Day, y=Steps))
+    p1 <- g + geom_bar(stat = "Identity", aes(fill=Day)) +
+        geom_text(aes(label=paste(round(Steps,0)," Steps")), position = position_dodge(width=0.9), vjust=-.5, color="black") +
+        theme(axis.text.x = element_text(angle = 90, hjust = 0)) +
+        theme(panel.background = element_rect(fill = "lightgrey")) +
+        theme(strip.background = element_rect(fill = "lightgrey")) +
+        theme(panel.grid.minor = element_blank()) +
+        theme(panel.grid.major = element_line(colour = "grey95")) +
+        theme(plot.margin=unit(c(2,1,1.5,1.2),"cm")) +
+        scale_y_continuous(labels = scales::comma) +
+        theme(legend.position="none") +
+        xlab("Steps per Day") +
+        theme(axis.text.x = element_text(size=10,margin = margin(0,0,20,0))) +
+        ylab("Average Number of Steps") + 
+        theme(axis.text.y = element_text(size=10,margin = margin(0,0,0,10))) +
+        ggtitle("Average Number of Steps for Weekend Days Adjustmed for Missing Values") +
+        theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
+    
+    g <- ggplot(stepsOrigWKDays, aes(x=Day, y=Steps))
+    p2 <- g + geom_bar(stat = "Identity", aes(fill=Day)) +
+        geom_text(aes(label=paste(round(Steps,0)," Steps")), position = position_dodge(width=0.9), vjust=-.5, color="black") +
+        theme(axis.text.x = element_text(angle = 90, hjust = 0)) +
+        theme(panel.background = element_rect(fill = "lightgrey")) +
+        theme(strip.background = element_rect(fill = "lightgrey")) +
+        theme(panel.grid.minor = element_blank()) +
+        theme(panel.grid.major = element_line(colour = "grey95")) +
+        theme(plot.margin=unit(c(2,1,1.5,1.2),"cm")) +
+        scale_y_continuous(labels = scales::comma) +
+        theme(legend.position="none") +
+        xlab("Steps per Day") +
+        theme(axis.text.x = element_text(size=10,margin = margin(0,0,20,0))) +
+        ylab("Average Number of Steps") + 
+        theme(axis.text.y = element_text(size=10,margin = margin(0,0,0,10))) +
+        ggtitle("Average Number of Steps for Weekdays Adjustmed for Missing Values") +
+        theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
+    
+    grid.arrange(p1,p2, nrow = 2, ncol = 1)
 
-stepsOrigAvg$WeekDay <- weekdays(as.Date(stepsOrigAvg$Day))
-stepsOrigWEDays <- filter(data.table(stepsOrigAvg), WeekDay %in% c("Saturday","Sunday"))
-stepsOrigWEDays <- as.data.frame(tapply(stepsOrigWEDays$Steps,stepsOrigWEDays$WeekDay, mean))
-stepsOrigWEDays$Day <- row.names(stepsOrigWEDays)
-colnames(stepsOrigWEDays) <- c("Steps","Day")
-
-stepsOrigWKDays <- filter(data.table(stepsOrigAvg), WeekDay %in% c("Monday","Tuesday","Wednesday","Thursday","Friday"))
-stepsOrigWKDays <- as.data.frame(tapply(stepsOrigWKDays$Steps,stepsOrigWKDays$WeekDay, mean))
-stepsOrigWKDays$Day <- row.names(stepsOrigWKDays)
-colnames(stepsOrigWKDays) <- c("Steps","Day")
-
-g <- ggplot(stepsOrigWEDays, aes(x=Day, y=Steps))
-p1 <- g + geom_bar(stat = "Identity", aes(fill=Day)) +
-    geom_text(aes(label=paste(round(Steps,0)," Steps")), position = position_dodge(width=0.9), vjust=-.5, color="black") +
-    theme(axis.text.x = element_text(angle = 90, hjust = 0)) +
-    theme(panel.background = element_rect(fill = "lightgrey")) +
-    theme(strip.background = element_rect(fill = "lightgrey")) +
-    theme(panel.grid.minor = element_blank()) +
-    theme(panel.grid.major = element_line(colour = "grey95")) +
-    theme(plot.margin=unit(c(2,1,1.5,1.2),"cm")) +
-    scale_y_continuous(labels = scales::comma) +
-    theme(legend.position="none") +
-    xlab("Steps per Day") +
-    theme(axis.text.x = element_text(size=10,margin = margin(0,0,20,0))) +
-    ylab("Average Number of Steps") + 
-    theme(axis.text.y = element_text(size=10,margin = margin(0,0,0,10))) +
-    ggtitle("Average Number of Steps for Weekend Days Adjustmed for Missing Values") +
-    theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
-
-g <- ggplot(stepsOrigWKDays, aes(x=Day, y=Steps))
-p2 <- g + geom_bar(stat = "Identity", aes(fill=Day)) +
-    geom_text(aes(label=paste(round(Steps,0)," Steps")), position = position_dodge(width=0.9), vjust=-.5, color="black") +
-    theme(axis.text.x = element_text(angle = 90, hjust = 0)) +
-    theme(panel.background = element_rect(fill = "lightgrey")) +
-    theme(strip.background = element_rect(fill = "lightgrey")) +
-    theme(panel.grid.minor = element_blank()) +
-    theme(panel.grid.major = element_line(colour = "grey95")) +
-    theme(plot.margin=unit(c(2,1,1.5,1.2),"cm")) +
-    scale_y_continuous(labels = scales::comma) +
-    theme(legend.position="none") +
-    xlab("Steps per Day") +
-    theme(axis.text.x = element_text(size=10,margin = margin(0,0,20,0))) +
-    ylab("Average Number of Steps") + 
-    theme(axis.text.y = element_text(size=10,margin = margin(0,0,0,10))) +
-    ggtitle("Average Number of Steps for Weekdays Adjustmed for Missing Values") +
-    theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
-
-grid.arrange(p1,p2, nrow = 2, ncol = 1)
-```
-
-![Sample panel plot](https://github.com/bjoernsteffens/reprores_w1/blob/master/reprores1h.png)
-
-next one after here
 
 ![Sample panel plot](illustrations/reprores1h.png) 
+
+
+
 
