@@ -170,7 +170,9 @@ g + geom_bar(stat = "Identity", alpha = 0.9) + geom_hline(yintercept=100, col = 
 
 ![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
 
+
 Looking closer at the data in between 0800 and 0900 we see that there are values below 100 steps so I should take a deeper look into that later to get a better specification of the interval.
+
 
 
 ```r
@@ -260,6 +262,7 @@ In the previous code we did already create that 1) data frame (stepsAvgIntDay) a
 Reading in the data again placing it in another data frame to keep all other information intact while we attempt and replace those missing values.
 
 
+
 ```r
 stepsOrig <- read.csv("activity.csv")
 stepsOrig$date <- as.Date(stepsOrig$date,"%Y-%m-%d")
@@ -270,6 +273,7 @@ colnames(stepsOrig) <- c("Steps","Day","Interval","WeekDay")
 
 
 How many missing values do we have? Executing mean(is.na(stepsOrig[1])) tells us roughly 13%. The Knitrcode code tells us 13.11% of the observations have missing values. This is above 5% and can be considered as statistically significant not to be ignored.
+
 
 
 ```r
@@ -291,7 +295,9 @@ for (i in 1:nrow(stepsOrig)) {
 }
 ```
 
+
 Plotting the new timeseries the total number of steps per day a lot more data emerges. The plots also answers question No.7 illustrating the imputed data.
+
 
 
 ```r
@@ -382,7 +388,7 @@ p1 <- g + geom_bar(stat = "Identity", aes(fill=Day)) +
     theme(axis.text.x = element_text(size=10,margin = margin(0,0,20,0))) +
     ylab("Average Number of Steps") + 
     theme(axis.text.y = element_text(size=10,margin = margin(0,0,0,10))) +
-    ggtitle("Average Number of Steps for Weekend Days Adjustmed for Missing Values") +
+    ggtitle("Average Number of Steps for Weekend Days Adjusted for Missing Values") +
     theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
 
 g <- ggplot(stepsOrigWKDays, aes(x=Day, y=Steps))
@@ -400,11 +406,80 @@ p2 <- g + geom_bar(stat = "Identity", aes(fill=Day)) +
     theme(axis.text.x = element_text(size=10,margin = margin(0,0,20,0))) +
     ylab("Average Number of Steps") + 
     theme(axis.text.y = element_text(size=10,margin = margin(0,0,0,10))) +
-    ggtitle("Average Number of Steps for Weekdays Adjustmed for Missing Values") +
+    ggtitle("Average Number of Steps for Weekdays Adjusted for Missing Values") +
     theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
 
 grid.arrange(p1,p2, nrow = 2, ncol = 1)
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
+
+
+Plotting the interval pattern for weekend and weekdays we see a distinct difference during the days.
+
+
+
+```r
+#
+# Add the final plot comparing WE and WK interval patterns
+#
+stepsOrigIntWE <- filter(data.table(stepsOrig), WeekDay %in% c("Saturday","Sunday"))
+stepsOrigIntWEAvg <- as.data.frame(tapply(stepsOrigIntWE$Steps,stepsOrigIntWE$Interval,mean))
+stepsOrigIntWEAvg$Interval <- row.names(stepsOrigIntWEAvg)
+colnames(stepsOrigIntWEAvg) <- c("Steps","Interval")
+# Ensure geom_bar does not try and sort the x Axis
+stepsOrigIntWEAvg$Interval <- factor(stepsOrigIntWEAvg$Interval, levels = stepsAvgInt$Interval)
+
+
+stepsOrigIntWK <- filter(data.table(stepsOrig), WeekDay %in% c("Monday","Tuesday","Wednesday","Thursday","Friday"))
+stepsOrigIntWKAvg <- as.data.frame(tapply(stepsOrigIntWK$Steps,stepsOrigIntWK$Interval,mean))
+stepsOrigIntWKAvg$Interval <- row.names(stepsOrigIntWKAvg)
+colnames(stepsOrigIntWKAvg) <- c("Steps","Interval")
+# Ensure geom_bar does not try and sort the x Axis
+stepsOrigIntWKAvg$Interval <- factor(stepsOrigIntWKAvg$Interval, levels = stepsAvgInt$Interval)
+
+g <- ggplot(stepsOrigIntWEAvg, aes(x=Interval, y=Steps, fill = 20))
+p1 <- g + geom_bar(stat = "Identity", alpha = 0.9) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 0)) +
+    theme(panel.background = element_rect(fill = "lightblue")) +
+    theme(strip.background = element_rect(fill = "lightblue")) +
+    theme(panel.grid.minor = element_blank()) +
+    theme(panel.grid.major = element_line(colour = "grey95")) +
+    theme(plot.margin=unit(c(2,1,1.5,1.2),"cm")) +
+    scale_y_continuous(labels = scales::comma) +
+    theme(legend.position="none") +
+    xlab("Weekend Intervals") +
+    #
+    # ticks only at the full hour
+    scale_x_discrete(breaks=seq(0,2355,100)) +
+    theme(axis.text.x = element_text(size=10,margin = margin(0,0,20,0))) +
+    ylab("Number of Steps per Interval") + 
+    theme(axis.text.y = element_text(size=10,margin = margin(0,0,0,10))) +
+    ggtitle("Average Number of Weekend Steps per Interval") +
+    theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
+
+g <- ggplot(stepsOrigIntWKAvg, aes(x=Interval, y=Steps, fill = 20))
+p2 <- g + geom_bar(stat = "Identity", alpha = 0.9) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 0)) +
+    theme(panel.background = element_rect(fill = "lightblue")) +
+    theme(strip.background = element_rect(fill = "lightblue")) +
+    theme(panel.grid.minor = element_blank()) +
+    theme(panel.grid.major = element_line(colour = "grey95")) +
+    theme(plot.margin=unit(c(2,1,1.5,1.2),"cm")) +
+    scale_y_continuous(labels = scales::comma) +
+    theme(legend.position="none") +
+    xlab("Weekday Intervals") +
+    #
+    # ticks only at the full hour
+    scale_x_discrete(breaks=seq(0,2355,100)) +
+    theme(axis.text.x = element_text(size=10,margin = margin(0,0,20,0))) +
+    ylab("Number of Steps per Interval") + 
+    theme(axis.text.y = element_text(size=10,margin = margin(0,0,0,10))) +
+    ggtitle("Average Number of Weekend Steps per Interval") +
+    theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
+
+grid.arrange(p1,p2, nrow = 2, ncol = 1)
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png) 
 
