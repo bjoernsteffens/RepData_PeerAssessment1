@@ -133,7 +133,7 @@ Note: Plots do not contain any missing values. They have all been filtered out p
          main = "Number of Steps per Day in Groups",
          col = "lightblue")
     
-![alt text](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1a.png)
+![Sample panel plot](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1a.png)
     
     #
     # Plot it on the X axis, dont plot legend and turn the x-labels
@@ -153,47 +153,10 @@ Note: Plots do not contain any missing values. They have all been filtered out p
         ggtitle("Number of Steps Recorded per Day") +
         theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
         
-![alt text](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1b.png)
+![Sample panel plot](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1b.png)
 
 
 ## What is the average daily activity pattern?
-
-
-If we take the average of the steps in each interval across the entire data set we see that the interval in between ~800 and ~900 in the morning seems a likely candidate for the most active period during the day.
-
-
-    #
-    # Lets grab the average values for the intervals first
-    # and fix the column names
-    stepsAvgInt <- as.data.frame(tapply(steps$steps,steps$interval, mean))
-    stepsAvgInt$Interval <- row.names(stepsAvgInt)
-    colnames(stepsAvgInt) <- c("Steps","Interval")
-    
-    #
-    # Ensure geom_bar does not try and sort the x Axis
-    stepsAvgInt$Interval <- factor(stepsAvgInt$Interval, levels = stepsAvgInt$Interval)
-    
-    g <- ggplot(stepsAvgInt, aes(x=Interval, y=Steps, fill = 20))
-    g + geom_bar(stat = "Identity", alpha = 0.9) + geom_hline(yintercept=100, col = "red") +
-        theme(axis.text.x = element_text(angle = 90, hjust = 0)) +
-        theme(panel.background = element_rect(fill = "lightblue")) +
-        theme(strip.background = element_rect(fill = "lightblue")) +
-        theme(panel.grid.minor = element_blank()) +
-        theme(panel.grid.major = element_line(colour = "grey95")) +
-        theme(plot.margin=unit(c(2,1,1.5,1.2),"cm")) +
-        scale_y_continuous(labels = scales::comma) +
-        theme(legend.position="none") +
-        xlab("Daily Intervals") +
-        #
-        # ticks only at the full hour
-        scale_x_discrete(breaks=seq(0,2355,100)) +
-        theme(axis.text.x = element_text(size=10,margin = margin(0,0,20,0))) +
-        ylab("Number of Steps per Interval") + 
-        theme(axis.text.y = element_text(size=10,margin = margin(0,0,0,10))) +
-        ggtitle("Average Number of Steps per Interval") +
-        theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
-        
-![alt text](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1c.png)
 
 
 Looking closer at the data in between 0800 and 0900 we see that there are values below 100 steps so I should take a deeper look into that later to get a better specification of the interval.
@@ -227,7 +190,7 @@ Looking closer at the data in between 0800 and 0900 we see that there are values
         theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
         
 
-![alt text](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1d.png)
+![Sample panel plot](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1d.png)
     
 
 We learn that simply taking the daily average across the entire data set will be a bad strategy for imputing mussing data. We also see that depening on what time during the day and also the day of week.
@@ -260,7 +223,7 @@ Let's investigate that in more detail and see if we can learn more for implement
     
     grid.arrange(p1,p2, nrow = 2, ncol = 1, top = "Daily Steps Profile vs Interval Steps Profile")
     
-![alt text](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1e.png)
+![Sample panel plot](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1e.png)
 
 
 New information from these plots are that Fridays and Thursdays have higher average number of steps. We also see that during the night we have considerably less steps and may need to consider assigning a very low value between 12:00am and 06:00am for missing values.
@@ -360,7 +323,7 @@ Plotting the new timeseries the total number of steps per day a lot more data em
     
     grid.arrange(p1,p2, nrow = 2, ncol = 1)
 
-![alt text](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1f.png)
+![Sample panel plot](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1f.png)
 
 
 ### Are there differences in activity patterns between weekdays and weekends?
@@ -419,9 +382,9 @@ p2 <- g + geom_bar(stat = "Identity", aes(fill=Day)) +
 grid.arrange(p1,p2, nrow = 2, ncol = 1)
 ```
 
-![alt text](https://github.com/bjoernsteffens/reprores_w1/blob/master/reprores1h.png)
+![Sample panel plot](https://github.com/bjoernsteffens/reprores_w1/blob/master/reprores1h.png)
 
 next one after here
 
-![Sample panel plot](reprores1h.png) 
+![Sample panel plot](illustrations/reprores1h.png) 
 
