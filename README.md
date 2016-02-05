@@ -227,6 +227,7 @@ Looking closer at the data in between 0800 and 0900 we see that there are values
         ggtitle("Steps per Interval between 800 and 855") +
         theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
         
+
 ![alt text](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1d.png)
     
 
