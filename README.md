@@ -133,7 +133,7 @@ Note: Plots do not contain any missing values. They have all been filtered out p
          main = "Number of Steps per Day in Groups",
          col = "lightblue")
     
-    ![alt text](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1a.png)
+![alt text](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1a.png)
     
     #
     # Plot it on the X axis, dont plot legend and turn the x-labels
@@ -153,8 +153,7 @@ Note: Plots do not contain any missing values. They have all been filtered out p
         ggtitle("Number of Steps Recorded per Day") +
         theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
         
-    ![alt text](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1b.png)
-
+![alt text](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1b.png)
 
 
 ## What is the average daily activity pattern?
@@ -194,7 +193,7 @@ If we take the average of the steps in each interval across the entire data set 
         ggtitle("Average Number of Steps per Interval") +
         theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
         
-        ![alt text](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1c.png)
+![alt text](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1c.png)
 
 
 Looking closer at the data in between 0800 and 0900 we see that there are values below 100 steps so I should take a deeper look into that later to get a better specification of the interval.
@@ -231,8 +230,6 @@ Looking closer at the data in between 0800 and 0900 we see that there are values
 ![alt text](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1d.png)
     
 
-
-
 We learn that simply taking the daily average across the entire data set will be a bad strategy for imputing mussing data. We also see that depening on what time during the day and also the day of week.
 
 Let's investigate that in more detail and see if we can learn more for implementing an impute strategy
@@ -266,74 +263,165 @@ Let's investigate that in more detail and see if we can learn more for implement
 ![alt text](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1e.png)
 
 
-
 New information from these plots are that Fridays and Thursdays have higher average number of steps. We also see that during the night we have considerably less steps and may need to consider assigning a very low value between 12:00am and 06:00am for missing values.
-
 
 
 ### Imputing missing values
 
-Note that there are a number of days/intervals where there are missing
-values (coded as `NA`). The presence of missing days may introduce
-bias into some calculations or summaries of the data.
+Note: This paragraph answers question 7 as well.
 
-1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with `NA`s)
+Based on what we have previously learned our strategy for imputing missing values is described by the sequence below.
 
-2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+1. Create a data frame with average values per weekday and interval
+2. Find the missing values in the original dataset
+3. Establish the interval and weekday of the missing value
+4. Look it up in the data frame with the weekday and interval averages.
+5. Assign the average to the missing value.
 
-3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
+In the previous code we did already create that 1) data frame (stepsAvgIntDay) and we can re-use this one to lookup those values. That "reference frame" contains all 288 intervals for 7 days. If we check the lenght of it it has 288 * 7 = 2,016 observations. This means that we have average values for all possible intervals that could potentially be missing.
 
-4. Make a histogram of the total number of steps taken each day and Calculate and report the **mean** and **median** total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+Reading in the data again placing it in another data frame to keep all other information intact while we attempt and replace those missing values.
+
+
+    stepsOrig <- read.csv("activity.csv")
+    stepsOrig$date <- as.Date(stepsOrig$date,"%Y-%m-%d")
+    stepsOrig$interval <- as.factor(stepsOrig$interval)
+    stepsOrig$WeekDay <- weekdays(as.Date(stepsOrig$date))
+    colnames(stepsOrig) <- c("Steps","Day","Interval","WeekDay")
+
+
+How many missing values do we have? Executing mean(is.na(stepsOrig[1])) tells us roughly 13%. The Knitrcode code tells us `r format(100*mean(is.na(stepsOrig[1])), digits=4, decimal.mark=".", big.mark=",",small.mark="" , small.interval=2)`% of the observations have missing values. This is above 5% and can be considered as statistically significant not to be ignored.
+
+
+    #
+    # Lookup and replace the missing values. If you know the tapply,sapply, split version of this I would be
+    # more than welcome to be educated. I just could not figure that out. :-/
+    for (i in 1:nrow(stepsOrig)) {
+    
+        row = stepsOrig[i,]
+        ISNA <- FALSE
+        
+        if (is.na(stepsOrig[i,1])) {
+            ISNA <- TRUE
+            lookWeekDay <- row[1,4]
+            lookInterval <- row[1,3]
+            stepsOrig[i,1] <- as.integer(round(filter(stepsAvgDayInt, WeekDay == lookWeekDay & Interval == lookInterval)[,3]))
+        }
+        
+    }
+
+
+Plotting the new timeseries the total number of steps per day a lot more data emerges. The plots also answers question No.7 illustrating the imputed data.
+
+    #
+    # Average the values per day
+    stepsOrigAvg <- as.data.frame(tapply(stepsOrig$Steps, stepsOrig$Day, sum))
+    stepsOrigAvg$Day <- row.names(stepsOrigAvg)
+    colnames(stepsOrigAvg) <- c("Steps","Day")
+    
+    
+    #
+    # Plot that time series 
+    g <- ggplot(stepsOrigAvg, aes(x=Day, y=Steps, fill = 20))
+    p1 <- g + geom_bar(stat = "Identity", alpha = 0.9) +
+        theme(axis.text.x = element_text(angle = 90, hjust = 0)) +
+        theme(panel.background = element_rect(fill = "lightblue")) +
+        theme(strip.background = element_rect(fill = "lightblue")) +
+        theme(panel.grid.minor = element_blank()) +
+        theme(panel.grid.major = element_line(colour = "grey95")) +
+        theme(plot.margin=unit(c(2,1,1.5,1.2),"cm")) +
+        scale_y_continuous(labels = scales::comma) +
+        theme(legend.position="none") +
+        xlab("Steps per Day") +
+        theme(axis.text.x = element_text(size=10,margin = margin(0,0,20,0))) +
+        ylab("Average Number of Steps") + 
+        theme(axis.text.y = element_text(size=10,margin = margin(0,0,0,10))) +
+        ggtitle("Average Number of Steps per Day Adjusted for Missing Values") +
+        theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
+    
+    #
+    # Add the comparison as a service for the reader
+    g <- ggplot(stepsDay, aes(x=Day, y=Steps, fill = 20))
+    p2 <- g + geom_bar(stat = "Identity", alpha = 0.9) +
+        theme(axis.text.x = element_text(angle = 90, hjust = 0)) +
+        theme(panel.background = element_rect(fill = "lightgrey")) +
+        theme(strip.background = element_rect(fill = "lightgrey")) +
+        theme(panel.grid.minor = element_blank()) +
+        theme(panel.grid.major = element_line(colour = "grey95")) +
+        theme(plot.margin=unit(c(2,1,1.5,1.2),"cm")) +
+        scale_y_continuous(labels = scales::comma) +
+        theme(legend.position="none") +
+        xlab("Steps per Day") +
+        theme(axis.text.x = element_text(size=10,margin = margin(0,0,20,0))) +
+        ylab("Average Number of Steps") + 
+        theme(axis.text.y = element_text(size=10,margin = margin(0,0,0,10))) +
+        ggtitle("Average Number of Steps per Day without Adjustment for Missing Values") +
+        theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
+    
+    grid.arrange(p1,p2, nrow = 2, ncol = 1)
+
+![alt text](https://github.com/bjoernsteffens/RepData_PeerAssessment1/blob/master/reprores1f.png)
 
 
 ### Are there differences in activity patterns between weekdays and weekends?
 
-For this part the `weekdays()` function may be of some help here. Use
-the dataset with the filled-in missing values for this part.
+Using the adjusted data set and adding the weekday and plotting one chart per Saturday and Sundday and one for the days Monday through Friday.
 
-1. Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+```{r, echo=TRUE}
 
-1. Make a panel plot containing a time series plot (i.e. `type = "l"`) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). The plot should look something like the following, which was created using **simulated data**:
+stepsOrigAvg$WeekDay <- weekdays(as.Date(stepsOrigAvg$Day))
+stepsOrigWEDays <- filter(data.table(stepsOrigAvg), WeekDay %in% c("Saturday","Sunday"))
+stepsOrigWEDays <- as.data.frame(tapply(stepsOrigWEDays$Steps,stepsOrigWEDays$WeekDay, mean))
+stepsOrigWEDays$Day <- row.names(stepsOrigWEDays)
+colnames(stepsOrigWEDays) <- c("Steps","Day")
 
-![Sample panel plot](instructions_fig/sample_panelplot.png) 
+stepsOrigWKDays <- filter(data.table(stepsOrigAvg), WeekDay %in% c("Monday","Tuesday","Wednesday","Thursday","Friday"))
+stepsOrigWKDays <- as.data.frame(tapply(stepsOrigWKDays$Steps,stepsOrigWKDays$WeekDay, mean))
+stepsOrigWKDays$Day <- row.names(stepsOrigWKDays)
+colnames(stepsOrigWKDays) <- c("Steps","Day")
 
+g <- ggplot(stepsOrigWEDays, aes(x=Day, y=Steps))
+p1 <- g + geom_bar(stat = "Identity", aes(fill=Day)) +
+    geom_text(aes(label=paste(round(Steps,0)," Steps")), position = position_dodge(width=0.9), vjust=-.5, color="black") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 0)) +
+    theme(panel.background = element_rect(fill = "lightgrey")) +
+    theme(strip.background = element_rect(fill = "lightgrey")) +
+    theme(panel.grid.minor = element_blank()) +
+    theme(panel.grid.major = element_line(colour = "grey95")) +
+    theme(plot.margin=unit(c(2,1,1.5,1.2),"cm")) +
+    scale_y_continuous(labels = scales::comma) +
+    theme(legend.position="none") +
+    xlab("Steps per Day") +
+    theme(axis.text.x = element_text(size=10,margin = margin(0,0,20,0))) +
+    ylab("Average Number of Steps") + 
+    theme(axis.text.y = element_text(size=10,margin = margin(0,0,0,10))) +
+    ggtitle("Average Number of Steps for Weekend Days Adjustmed for Missing Values") +
+    theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
 
-**Your plot will look different from the one above** because you will
-be using the activity monitor data. Note that the above plot was made
-using the lattice system but you can make the same version of the plot
-using any plotting system you choose.
+g <- ggplot(stepsOrigWKDays, aes(x=Day, y=Steps))
+p2 <- g + geom_bar(stat = "Identity", aes(fill=Day)) +
+    geom_text(aes(label=paste(round(Steps,0)," Steps")), position = position_dodge(width=0.9), vjust=-.5, color="black") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 0)) +
+    theme(panel.background = element_rect(fill = "lightgrey")) +
+    theme(strip.background = element_rect(fill = "lightgrey")) +
+    theme(panel.grid.minor = element_blank()) +
+    theme(panel.grid.major = element_line(colour = "grey95")) +
+    theme(plot.margin=unit(c(2,1,1.5,1.2),"cm")) +
+    scale_y_continuous(labels = scales::comma) +
+    theme(legend.position="none") +
+    xlab("Steps per Day") +
+    theme(axis.text.x = element_text(size=10,margin = margin(0,0,20,0))) +
+    ylab("Average Number of Steps") + 
+    theme(axis.text.y = element_text(size=10,margin = margin(0,0,0,10))) +
+    ggtitle("Average Number of Steps for Weekdays Adjustmed for Missing Values") +
+    theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
 
-
-## Submitting the Assignment
-
-To submit the assignment:
-
-1. Commit your completed `PA1_template.Rmd` file to the `master` branch of your git repository (you should already be on the `master` branch unless you created new ones)
-
-2. Commit your `PA1_template.md` and `PA1_template.html` files produced by processing your R markdown file with the `knit2html()` function in R (from the **knitr** package)
-
-3. If your document has figures included (it should) then they should have been placed in the `figure/` directory by default (unless you overrode the default). Add and commit the `figure/` directory to your git repository.
-
-4. Push your `master` branch to GitHub.
-
-5. Submit the URL to your GitHub repository for this assignment on the course web site.
-
-In addition to submitting the URL for your GitHub repository, you will
-need to submit the 40 character SHA-1 hash (as string of numbers from
-0-9 and letters from a-f) that identifies the repository commit that
-contains the version of the files you want to submit. You can do this
-in GitHub by doing the following:
-
-1. Go into your GitHub repository web page for this assignment
-
-2. Click on the "?? commits" link where ?? is the number of commits you have in the repository. For example, if you made a total of 10 commits to this repository, the link should say "10 commits".
-
-3. You will see a list of commits that you have made to this repository. The most recent commit is at the very top. If this represents the version of the files you want to submit, then just click the "copy to clipboard" button on the right hand side that should appear when you hover over the SHA-1 hash. Paste this SHA-1 hash into the course web site when you submit your assignment. If you don't want to use the most recent commit, then go down and find the commit you want and copy the SHA-1 hash.
-
-A valid submission will look something like (this is just an **example**!)
-
-```r
-https://github.com/rdpeng/RepData_PeerAssessment1
-
-7c376cc5447f11537f8740af8e07d6facc3d9645
+grid.arrange(p1,p2, nrow = 2, ncol = 1)
 ```
+
+![alt text](https://github.com/bjoernsteffens/reprores_w1/blob/master/reprores1h.png)
+
+next one after here
+
+![Sample panel plot](reprores1h.png) 
+
