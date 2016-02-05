@@ -164,7 +164,7 @@ g + geom_bar(stat = "Identity", alpha = 0.9) + geom_hline(yintercept=100, col = 
 ```
 
 
-We learn that simply taking the daily average across the entire data set will be a bad strategy for imputing mussing data. We also see that depening on what time during the day and also the day of week.
+We learn that simply taking the daily average across the entire data set will be a bad strategy for imputing missing data. We also see that depening on what time during the day and also the day of week.
 
 Let's investigate that in more detail and see if we can learn more for implementing an impute strategy
 

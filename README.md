@@ -160,6 +160,7 @@ Note: Plots do not contain any missing values. They have all been filtered out p
 
 Looking closer at the data in between 0800 and 0900 we see that there are values below 100 steps so I should take a deeper look into that later to get a better specification of the interval.
 
+
     #
     # visual inspection gives us the time interval between 0800 and 0900 
     # in the morning seems to be the most active ones.
@@ -187,12 +188,11 @@ Looking closer at the data in between 0800 and 0900 we see that there are values
         theme(axis.text.y = element_text(size=10,margin = margin(0,0,0,10))) +
         ggtitle("Steps per Interval between 800 and 855") +
         theme(plot.title = element_text(size = 20,margin = margin(0,0,30,0)))
-        
 
-![Sample panel plot](illustrations/reprores1d.png)
+![Sample panel plot](illustrations/reprores1e.png)
     
 
-We learn that simply taking the daily average across the entire data set will be a bad strategy for imputing mussing data. We also see that depening on what time during the day and also the day of week.
+We learn that simply taking the daily average across the entire data set will be a bad strategy for imputing missing data. We also see that depening on what time during the day and also the day of week.
 
 Let's investigate that in more detail and see if we can learn more for implementing an impute strategy
 
@@ -222,7 +222,7 @@ Let's investigate that in more detail and see if we can learn more for implement
     
     grid.arrange(p1,p2, nrow = 2, ncol = 1, top = "Daily Steps Profile vs Interval Steps Profile")
     
-![Sample panel plot](illustrations/reprores1e.png)
+![Sample panel plot](illustrations/reprores1f.png)
 
 
 New information from these plots are that Fridays and Thursdays have higher average number of steps. We also see that during the night we have considerably less steps and may need to consider assigning a very low value between 12:00am and 06:00am for missing values.
@@ -322,7 +322,7 @@ Plotting the new timeseries the total number of steps per day a lot more data em
     
     grid.arrange(p1,p2, nrow = 2, ncol = 1)
 
-![Sample panel plot](illustrations/reprores1f.png)
+![Sample panel plot](illustrations/reprores1g.png)
 
 
 ### Are there differences in activity patterns between weekdays and weekends?
