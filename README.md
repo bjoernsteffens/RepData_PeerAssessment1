@@ -338,7 +338,7 @@ Plotting the new timeseries the total number of steps per day a lot more data em
 
 Using the adjusted data set and adding the weekday and plotting one chart per Saturday and Sundday and one for the days Monday through Friday.
 
-Note 1: See previous charts for the daily weekday vs weekend activity patter.
+Note 1: See previous charts for the daily weekday vs weekend activity pattern difference.
 Note 2: There are two days with 0 for all measurment intervals 2012-10-02 and 2012-11-15. These values have been left unadjusted for assuming that the step tracker was turned on but left at home.
 
     
